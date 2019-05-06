@@ -27,7 +27,13 @@ public class ChatServer {
     public static void main(String[] args) {
         AuthService authService;
         try {
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/network_chat",
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/network_chat"+
+                            "?verifyServerCertificate=false"+
+                            "&useSSL=false"+
+                            "&requireSSL=false"+
+                            "&useLegacyDatetimeCode=false"+
+                            "&amp"+
+                            "&serverTimezone=UTC",
                     "root", "DiasTopaz3922");
             UserRepository userRepository = new UserRepository(conn);
             authService = new AuthServiceJdbcImpl(userRepository);
