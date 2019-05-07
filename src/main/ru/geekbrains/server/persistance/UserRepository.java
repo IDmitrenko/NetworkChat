@@ -38,7 +38,7 @@ public class UserRepository {
         try (Statement stmt = conn.createStatement();
              ResultSet resultSet = stmt.executeQuery("select id, login, password from users")) {
             while (resultSet.next()) {
-                if (login == resultSet.getString("login")) {
+                if (login.equals(resultSet.getString("login"))) {
                     user = new User(resultSet.getInt("id"),
                             resultSet.getString("login"),
                             resultSet.getString("password"));
@@ -51,7 +51,7 @@ public class UserRepository {
         return user;
     }
 
-    public List<User> getAllUsers() throws SQLException {
+    public List<User> getAllUsers() {
         // Извлечь из БД полный список пользователей
         List<User> users = new ArrayList<>();
         try (Statement stmt = conn.createStatement();
@@ -93,7 +93,7 @@ public class UserRepository {
 
         for (Throwable e : ex) {
             if (e instanceof SQLException) {
-                if (ignoreSQLException(((SQLException) e).getSQLState()) == false) {
+                if (!ignoreSQLException(((SQLException) e).getSQLState())) {
 
                     e.printStackTrace(System.err);
                     System.err.println("SQLState: " +
@@ -126,10 +126,8 @@ public class UserRepository {
             return true;
 
         // 42Y55: Table already exists in schema
-        if (sqlState.equalsIgnoreCase("42Y55"))
-            return true;
+        return sqlState.equalsIgnoreCase("42Y55");
 
-        return false;
     }
 
 }

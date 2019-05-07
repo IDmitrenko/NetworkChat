@@ -13,7 +13,8 @@ public class AuthServiceJdbcImpl implements AuthService {
 
     @Override
     public boolean authUser(User user) {
-        // TODO авторизовать пользователя используя userRepository
-        return false;
+        // Авторизовать пользователя используя userRepository
+        User userFromDB = userRepository.findByLogin(user.getLogin());
+        return userFromDB != null && userFromDB.getPassword().equals(user.getPassword());
     }
 }

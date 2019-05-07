@@ -18,6 +18,7 @@ public class LoginDialog extends JDialog {
     private JLabel lbPassword;
     private JButton btnLogin;
     private JButton btnCancel;
+    private JButton btnNewUser;
 
     private boolean connected;
 
@@ -55,10 +56,14 @@ public class LoginDialog extends JDialog {
         panel.add(pfPassword, cs);
         panel.setBorder(new LineBorder(Color.GRAY));
 
+        btnNewUser = new JButton("Новый пользователь");
         btnLogin = new JButton("Войти");
         btnCancel = new JButton("Отмена");
 
         JPanel bp = new JPanel();
+
+        bp.add(btnNewUser);
+
         bp.add(btnLogin);
 
         btnLogin.addActionListener(new ActionListener() {
