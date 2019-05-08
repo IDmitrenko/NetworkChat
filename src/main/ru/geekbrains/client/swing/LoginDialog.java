@@ -63,6 +63,29 @@ public class LoginDialog extends JDialog {
         JPanel bp = new JPanel();
 
         bp.add(btnNewUser);
+        btnNewUser.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    network.newUserRegistration(tfUsername.getText(), String.valueOf(pfPassword.getPassword()));
+                    connected = true;
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(LoginDialog.this,
+                            "Ошибка сети",
+                            "Создание нового пользователя",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                } catch (AuthException ex) {
+                    JOptionPane.showMessageDialog(LoginDialog.this,
+                            "Ошибка регистрации",
+                            "Создание нового пользователя",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                dispose();
+            }
+        });
+
 
         bp.add(btnLogin);
 

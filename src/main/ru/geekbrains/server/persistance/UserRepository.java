@@ -17,7 +17,7 @@ public class UserRepository {
         createTableUsers(conn);
     }
 
-    public void insert(User user) {
+    public boolean insert(User user) {
         // Добавить нового пользователя в БД
         String SQL = "INSERT INTO " + tableName +
                 " (login , password) " +
@@ -29,7 +29,9 @@ public class UserRepository {
             preparedStatement.execute();
         } catch (SQLException ex) {
             printSQLException(ex);
+            return false;
         }
+        return true;
     }
 
     public User findByLogin(String login) {

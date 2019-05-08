@@ -5,4 +5,6 @@ import ru.geekbrains.server.User;
 public interface AuthService {
 
     boolean authUser(User user);
+
+    boolean createUser(User user);
 }
