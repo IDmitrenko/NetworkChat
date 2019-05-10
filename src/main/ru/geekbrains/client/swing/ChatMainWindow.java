@@ -36,7 +36,7 @@ public class ChatMainWindow extends JFrame implements MessageReciever {
 
     public ChatMainWindow() {
         setTitle("Сетевой чат.");
-        setBounds(200,200, 500, 500);
+        setBounds(200,200, 600, 600);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         setLayout(new BorderLayout());

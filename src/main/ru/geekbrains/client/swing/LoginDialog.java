@@ -2,6 +2,7 @@ package ru.geekbrains.client.swing;
 
 import ru.geekbrains.client.AuthException;
 import ru.geekbrains.client.Network;
+
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
@@ -77,7 +78,7 @@ public class LoginDialog extends JDialog {
                     return;
                 } catch (AuthException ex) {
                     JOptionPane.showMessageDialog(LoginDialog.this,
-                            "Ошибка регистрации",
+                            "Ошибка регистрации " + ex.getMessage(),
                             "Создание нового пользователя",
                             JOptionPane.ERROR_MESSAGE);
                     return;

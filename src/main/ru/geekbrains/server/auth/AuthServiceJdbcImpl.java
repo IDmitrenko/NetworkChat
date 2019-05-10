@@ -24,7 +24,6 @@ public class AuthServiceJdbcImpl implements AuthService {
         // Проверяем может он уже есть
         User userFromDB = userRepository.findByLogin(user.getLogin());
         if (userFromDB != null) {
-            // TODO ?? сообщение, что такой пользователь уже есть
             return false;
         }
         // Добавляем нового пользователя

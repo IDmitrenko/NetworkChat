@@ -1,9 +1,10 @@
 package ru.geekbrains.server;
 
-import ru.geekbrains.client.AuthException;
 import ru.geekbrains.client.TextMessage;
 import ru.geekbrains.server.auth.AuthService;
 import ru.geekbrains.server.auth.AuthServiceJdbcImpl;
+import ru.geekbrains.server.command.CommandFactory;
+import ru.geekbrains.server.command.UserFactory;
 import ru.geekbrains.server.persistance.UserRepository;
 
 import java.io.DataInputStream;
@@ -14,11 +15,10 @@ import java.net.Socket;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.*;
-
-import static ru.geekbrains.client.MessagePatterns.AUTH_FAIL_RESPONSE;
-import static ru.geekbrains.client.MessagePatterns.AUTH_SUCCESS_RESPONSE;
-import static ru.geekbrains.client.MessagePatterns.REGISTRATION_TAG;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class ChatServer {
 
@@ -63,66 +63,21 @@ public class ChatServer {
                 User user = null;
                 try {
                     String authMessage = inp.readUTF();
-                    if (authMessage.contains(REGISTRATION_TAG)) {
-                        user = registration(authMessage);
-                    } else {
-                        user = checkAuthentication(authMessage);
-                    }
+                    UserFactory userFactory = CommandFactory.valueOf(authMessage, out, authService, clientHandlerMap);
+                    user = userFactory.createUser(authMessage);
                 } catch (IOException ex) {
                     ex.printStackTrace();
-                    // TODO анализ на ошибку - регистрации или авторизации
-                } catch (AuthException ex) {
-                    out.writeUTF(AUTH_FAIL_RESPONSE);
-                    out.flush();
-                    socket.close();
                 }
-                // TODO 1111111 может разрулить по ID в User  (-1 авторизация, 0 регистрация)
-//                if (authService.createUser(user)) {
-//                    System.out.printf("User %s added successfully!%n", user.getLogin());
-//                }
 
-                if (user != null && authService.authUser(user)) {
-                    System.out.printf("User %s authorized successful!%n", user.getLogin());
+                if (user != null) {
                     subscribe(user.getLogin(), socket);
-                    out.writeUTF(AUTH_SUCCESS_RESPONSE);
-                    out.flush();
                 } else {
-                    if (user != null) {
-                        System.out.printf("Wrong authorization for user %s%n", user.getLogin());
-                    }
-                    out.writeUTF(AUTH_FAIL_RESPONSE);
-                    out.flush();
                     socket.close();
                 }
             }
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-    }
-
-    private User checkAuthentication(String authMessage) throws AuthException {
-        String[] authParts = authMessage.split(" ");
-        if (authParts.length != 3 || !authParts[0].equals("/auth")) {
-            System.out.printf("Incorrect authorization message %s%n", authMessage);
-            throw new AuthException();
-        }
-        return new User(-1, authParts[1], authParts[2]);
-    }
-
-    private User registration(String regMessage) throws AuthException {
-        String[] regParts = regMessage.split(" ");
-        if (regParts.length != 3) {
-            System.out.printf("Incorrect registration message %s%n", regMessage);
-            // TODO  здесь передать сообщение об ошибке
-            throw new AuthException();
-        }
-
-        User user = new User(0, regParts[1], regParts[2]);
-//        if (authService.createUser(user)) {
-//            System.out.printf("User %s added successfully!%n", user.getLogin());
-//        }
-
-        return user;
     }
 
     private void sendUserConnectedMessage(String login) throws IOException {
@@ -156,10 +111,10 @@ public class ChatServer {
         return Collections.unmodifiableSet(clientHandlerMap.keySet());
     }
 
-    public void subscribe(String login, Socket socket) throws IOException {
-        // TODO Проверить, подключен ли уже пользователь. Если да, то отправить клиенту ошибку
+    public boolean subscribe(String login, Socket socket) throws IOException {
         clientHandlerMap.put(login, new ClientHandler(login, socket, this));
         sendUserConnectedMessage(login);
+        return true;
     }
 
     public void unsubscribe(String login) {

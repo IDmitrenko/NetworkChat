@@ -9,12 +9,13 @@ public final class MessagePatterns {
 
     public static final String REGISTRATION_TAG = "/reg";
     public static final String REGISTRATION_PATTERN = REGISTRATION_TAG + " %s %s";
-    public static final String REGISTRATION_SUCCESS_RESPONSE = REGISTRATION_TAG + " successfull";
-    public static final String REGISTRATION_FAIL_RESPONSE = REGISTRATION_TAG + " fail";
+    public static final String REGISTRATION_SUCCESS_RESPONSE = REGISTRATION_TAG + " successful";
+    public static final String REGISTRATION_FAIL_RESPONSE = REGISTRATION_TAG + " fail. User exist";
 
     public static final String AUTH_TAG = "/auth";
     public static final String AUTH_PATTERN = AUTH_TAG + " %s %s";
     public static final String AUTH_SUCCESS_RESPONSE = AUTH_TAG + " successful";
+    public static final String AUTH_ALREADY_RESPONSE = "/auth already";
     public static final String AUTH_FAIL_RESPONSE = AUTH_TAG + " fail";
 
     public static final String DISCONNECT = "/disconnect";

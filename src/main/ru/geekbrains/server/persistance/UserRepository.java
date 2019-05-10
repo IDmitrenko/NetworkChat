@@ -37,15 +37,14 @@ public class UserRepository {
     public User findByLogin(String login) {
         // Найти пользователя в БД по логину
         User user = null;
-        try (Statement stmt = conn.createStatement();
-             ResultSet resultSet = stmt.executeQuery("select id, login, password from users")) {
-            while (resultSet.next()) {
-                if (login.equals(resultSet.getString("login"))) {
-                    user = new User(resultSet.getInt("id"),
-                            resultSet.getString("login"),
-                            resultSet.getString("password"));
-                    break;
-                }
+        try (PreparedStatement stmt = conn.prepareStatement("select id, login, password from users where login=?");
+        ) {
+            stmt.setString(1, login);
+            ResultSet resultSet = stmt.executeQuery();
+            if (resultSet.next()) {
+                user = new User(resultSet.getInt("id"),
+                        resultSet.getString("login"),
+                        resultSet.getString("password"));
             }
         } catch (SQLException ex) {
             printSQLException(ex);
