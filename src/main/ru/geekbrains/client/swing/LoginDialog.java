@@ -104,7 +104,7 @@ public class LoginDialog extends JDialog {
                     return;
                 } catch (AuthException ex) {
                     JOptionPane.showMessageDialog(LoginDialog.this,
-                            "Ошибка авторизации",
+                            "Ошибка авторизации" +ex.getMessage(),
                             "Авторизация",
                             JOptionPane.ERROR_MESSAGE);
                     return;
