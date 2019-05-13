@@ -2,6 +2,7 @@ package ru.geekbrains.client.swing;
 
 import ru.geekbrains.client.AuthException;
 import ru.geekbrains.client.Network;
+
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
@@ -18,6 +19,7 @@ public class LoginDialog extends JDialog {
     private JLabel lbPassword;
     private JButton btnLogin;
     private JButton btnCancel;
+    private JButton btnNewUser;
 
     private boolean connected;
 
@@ -55,10 +57,37 @@ public class LoginDialog extends JDialog {
         panel.add(pfPassword, cs);
         panel.setBorder(new LineBorder(Color.GRAY));
 
+        btnNewUser = new JButton("Новый пользователь");
         btnLogin = new JButton("Войти");
         btnCancel = new JButton("Отмена");
 
         JPanel bp = new JPanel();
+
+        bp.add(btnNewUser);
+        btnNewUser.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    network.newUserRegistration(tfUsername.getText(), String.valueOf(pfPassword.getPassword()));
+                    connected = true;
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(LoginDialog.this,
+                            "Ошибка сети",
+                            "Создание нового пользователя",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                } catch (AuthException ex) {
+                    JOptionPane.showMessageDialog(LoginDialog.this,
+                            "Ошибка регистрации " + ex.getMessage(),
+                            "Создание нового пользователя",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                dispose();
+            }
+        });
+
+
         bp.add(btnLogin);
 
         btnLogin.addActionListener(new ActionListener() {
@@ -75,7 +104,7 @@ public class LoginDialog extends JDialog {
                     return;
                 } catch (AuthException ex) {
                     JOptionPane.showMessageDialog(LoginDialog.this,
-                            "Ошибка авторизации",
+                            "Ошибка авторизации" +ex.getMessage(),
                             "Авторизация",
                             JOptionPane.ERROR_MESSAGE);
                     return;

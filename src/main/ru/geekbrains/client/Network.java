@@ -70,17 +70,28 @@ public class Network implements Closeable {
     }
 
     public void authorize(String login, String password) throws IOException, AuthException {
+        connectToServer(login, AUTH_PATTERN, password, AUTH_SUCCESS_RESPONSE);
+    }
+
+    public void newUserRegistration(String login, String password) throws IOException, AuthException {
+        connectToServer(login, REGISTRATION_PATTERN, password, REGISTRATION_SUCCESS_RESPONSE);
+    }
+
+    private void connectToServer(String login, String authPattern, String password, String authSuccessResponse) throws IOException, AuthException {
         socket = new Socket(hostName, port);
         out = new DataOutputStream(socket.getOutputStream());
         in = new DataInputStream(socket.getInputStream());
 
-        sendMessage(String.format(AUTH_PATTERN, login, password));
+        sendMessage(String.format(authPattern, login, password));
         String response = in.readUTF();
-        if (response.equals(AUTH_SUCCESS_RESPONSE)) {
+        if (response.equals(authSuccessResponse)) {
             this.login = login;
             receiverThread.start();
+        } else if (response.equals(AUTH_ALREADY_RESPONSE)) {
+            TextMessage msg = new TextMessage(login, login, "The user is already connected");
+            messageReciever.submitMessage(msg);
         } else {
-            throw new AuthException();
+            throw new AuthException(response);
         }
     }
 

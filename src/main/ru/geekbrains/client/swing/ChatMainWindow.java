@@ -36,7 +36,7 @@ public class ChatMainWindow extends JFrame implements MessageReciever {
 
     public ChatMainWindow() {
         setTitle("Сетевой чат.");
-        setBounds(200,200, 500, 500);
+        setBounds(200, 200, 600, 600);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         setLayout(new BorderLayout());
@@ -61,7 +61,10 @@ public class ChatMainWindow extends JFrame implements MessageReciever {
             public void actionPerformed(ActionEvent e) {
                 String text = messageField.getText();
                 String userTo = userList.getSelectedValue();
-                if (userTo == null) {
+
+                if (userTo == null ||
+                        network.getLogin().equals(userTo)) {
+                    text = null;
                     JOptionPane.showMessageDialog(ChatMainWindow.this,
                             "Ошибка",
                             "Не выбран пользователь",
