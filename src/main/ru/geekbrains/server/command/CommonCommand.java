@@ -21,7 +21,7 @@ public abstract class CommonCommand implements UserFactory {
     }
 
     @Override
-    public User createUser(String message) throws IOException {
+    public User actionsOfUser(String message) throws IOException {
         String[] regParts = message.split(" ");
         if (regParts.length != 3) {
             System.out.printf("Incorrect registration message %s%n", message);

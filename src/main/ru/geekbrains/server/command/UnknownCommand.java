@@ -13,7 +13,7 @@ public class UnknownCommand implements UserFactory {
     }
 
     @Override
-    public User createUser(String message) throws IOException {
+    public User actionsOfUser(String message) throws IOException {
         System.out.println("Internal error : Unknown command - " + message);
         out.writeUTF("Unknown command: " + message);
         out.flush();

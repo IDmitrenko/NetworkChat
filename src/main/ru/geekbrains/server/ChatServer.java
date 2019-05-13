@@ -64,7 +64,7 @@ public class ChatServer {
                 try {
                     String authMessage = inp.readUTF();
                     UserFactory userFactory = CommandFactory.valueOf(authMessage, out, authService, clientHandlerMap);
-                    user = userFactory.createUser(authMessage);
+                    user = userFactory.actionsOfUser(authMessage);
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
