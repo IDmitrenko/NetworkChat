@@ -29,7 +29,8 @@ public class ChatServer {
         AuthService authService;
         try {
             Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/network_chat" +
-                            "?verifyServerCertificate=false" +
+                            "?allowPublicKeyRetrieval=TRUE" +
+//                            "?verifyServerCertificate=false" +
                             "&useSSL=false" +
                             "&requireSSL=false" +
                             "&useLegacyDatetimeCode=false" +
