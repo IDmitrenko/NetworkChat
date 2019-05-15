@@ -13,6 +13,7 @@ import ru.geekbrains.client.AuthException;
 import ru.geekbrains.client.MessageReciever;
 import ru.geekbrains.client.Network;
 import ru.geekbrains.client.TextMessage;
+import ru.geekbrains.client.history.UserHistory;
 
 import java.io.IOException;
 import java.net.URL;
@@ -53,6 +54,9 @@ public class Controller implements Initializable, MessageReciever {
 
     private Network network;
 
+    private UserHistory userHistory;
+    private String pathHistoryMessage;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         messageList = FXCollections.observableArrayList();
@@ -69,7 +73,8 @@ public class Controller implements Initializable, MessageReciever {
         userList.addAll("ivan", "petr", "julia"); // пока фмксированный список
         lvUserList.setItems(userList);
 
-        network = new Network("localhost", 7777, this);
+        userHistory = new UserHistory(pathHistoryMessage);
+        network = new Network("localhost", 7777, this, userHistory);
         authPanel.setVisible(true);
         msgPanel.setVisible(false);
     }

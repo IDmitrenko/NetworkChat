@@ -1,5 +1,7 @@
 package ru.geekbrains.client;
 
+import ru.geekbrains.client.history.UserHistory;
+
 import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -23,10 +25,14 @@ public class Network implements Closeable {
 
     private Thread receiverThread;
 
-    public Network(String hostName, int port, MessageReciever messageReciever) {
+    private UserHistory userHistory;
+
+    public Network(String hostName, int port, MessageReciever messageReciever,
+                   UserHistory userHistory) {
         this.hostName = hostName;
         this.port = port;
         this.messageReciever = messageReciever;
+        this.userHistory = userHistory;
 
         this.receiverThread = new Thread(new Runnable() {
             @Override
@@ -39,6 +45,7 @@ public class Network implements Closeable {
                         TextMessage msg = parseTextMessageRegx(text, login);
                         if (msg != null) {
                             messageReciever.submitMessage(msg);
+                            userHistory.saveHistory(msg, login);
                             continue;
                         }
 

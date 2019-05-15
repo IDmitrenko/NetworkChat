@@ -21,7 +21,7 @@ public class UserRepository {
         // Добавить нового пользователя в БД
         String SQL = "INSERT INTO " + tableName +
                 " (login , password) " +
-                "VALUES (?, ?)";
+                "VALUES (?, ?);";
 
         try (PreparedStatement preparedStatement = conn.prepareStatement(SQL)) {
             preparedStatement.setString(1, user.getLogin());
@@ -36,8 +36,8 @@ public class UserRepository {
 
     public User findByLogin(String login) {
         // Найти пользователя в БД по логину
-        User user = null;
-        try (PreparedStatement stmt = conn.prepareStatement("select id, login, password from users where login=?");
+        User user = new User(-1, "", "");
+        try (PreparedStatement stmt = conn.prepareStatement("select id, login, password from users where login=?;");
         ) {
             stmt.setString(1, login);
             ResultSet resultSet = stmt.executeQuery();
@@ -56,7 +56,7 @@ public class UserRepository {
         // Извлечь из БД полный список пользователей
         List<User> users = new ArrayList<>();
         try (Statement stmt = conn.createStatement();
-             ResultSet resultSet = stmt.executeQuery("select id, login, password from users")) {
+             ResultSet resultSet = stmt.executeQuery("select id, login, password from users;")) {
             while (resultSet.next()) {
                 User user = new User(resultSet.getInt("id"),
                         resultSet.getString("login"),
@@ -69,11 +69,11 @@ public class UserRepository {
         return users;
     }
 
-    private void createTableUsers(Connection conn) throws SQLException {
+    private void createTableUsers(Connection conn) {
         // Проверить существует ли таблица users
-        DatabaseMetaData md = conn.getMetaData();
-        ResultSet rs = md.getTables("network_chat", "network_chat", tableName, null);
-        if (!rs.next()) {
+//        DatabaseMetaData md = conn.getMetaData();
+//        ResultSet rs = md.getTables("network_chat", "network_chat", tableName, null);
+//        if (!rs.next()) {
             // Если нет, то создать ее
             try (Statement statement = conn.createStatement()) {
                 String SQL = "CREATE TABLE IF NOT EXISTS " + tableName +
@@ -81,14 +81,14 @@ public class UserRepository {
                         "login VARCHAR(25) NOT NULL , " +
                         "password VARCHAR(25) NOT NULL , " +
                         "PRIMARY KEY (id), " +
-                        "UNIQUE INDEX uq_login(login))";
+                        "UNIQUE INDEX uq_login(login));";
 
                 statement.executeUpdate(SQL);
             } catch (SQLException ex) {
                 printSQLException(ex);
             }
         }
-    }
+//    }
 
     private static void printSQLException(SQLException ex) {
 

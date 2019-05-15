@@ -3,6 +3,7 @@ package ru.geekbrains.client.swing;
 import ru.geekbrains.client.MessageReciever;
 import ru.geekbrains.client.Network;
 import ru.geekbrains.client.TextMessage;
+import ru.geekbrains.client.history.UserHistory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.util.Set;
 
 public class ChatMainWindow extends JFrame implements MessageReciever {
@@ -34,7 +36,12 @@ public class ChatMainWindow extends JFrame implements MessageReciever {
 
     private final Network network;
 
-    public ChatMainWindow() {
+    private final UserHistory userHistory;
+    private final String pathHistoryMessage;
+
+    public ChatMainWindow(String pathHistoryMessage) {
+        this.pathHistoryMessage = pathHistoryMessage;
+
         setTitle("Сетевой чат.");
         setBounds(200, 200, 600, 600);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -75,6 +82,12 @@ public class ChatMainWindow extends JFrame implements MessageReciever {
                     messageListModel.add(messageListModel.size(), msg);
                     messageField.setText(null);
                     network.sendTextMessage(msg);
+                    try {
+                        userHistory.saveHistory(msg, network.getLogin());
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+
                 }
             }
         });
@@ -92,7 +105,8 @@ public class ChatMainWindow extends JFrame implements MessageReciever {
 
         setVisible(true);
 
-        this.network = new Network("localhost", 7777, this);
+        this.userHistory = new UserHistory(pathHistoryMessage);
+        this.network = new Network("localhost", 7777, this, userHistory);
 
         LoginDialog loginDialog = new LoginDialog(this, network);
         loginDialog.setVisible(true);
