@@ -13,8 +13,8 @@ import static ru.geekbrains.client.MessagePatterns.*;
 
 public class Network implements Closeable {
 
-    public Socket socket;
-    public DataInputStream in;
+    private Socket socket;
+    private DataInputStream in;
     public DataOutputStream out;
 
     private String hostName;
@@ -78,6 +78,9 @@ public class Network implements Closeable {
 
     public void authorize(String login, String password) throws IOException, AuthException {
         connectToServer(login, AUTH_PATTERN, password, AUTH_SUCCESS_RESPONSE);
+        String messageHistory = userHistory.listHistory(login);
+        TextMessage msg = new TextMessage(login, login, messageHistory);
+        messageReciever.submitMessage(msg);
     }
 
     public void newUserRegistration(String login, String password) throws IOException, AuthException {

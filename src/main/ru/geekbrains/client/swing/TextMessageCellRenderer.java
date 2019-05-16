@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 
 public class TextMessageCellRenderer extends JPanel implements ListCellRenderer<TextMessage> {
 
-    public static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+    public static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 
     private final JLabel created;
 
@@ -18,7 +18,7 @@ public class TextMessageCellRenderer extends JPanel implements ListCellRenderer<
 
     private final JPanel panel;
 
-    public TextMessageCellRenderer() {
+    private TextMessageCellRenderer() {
         super();
         setLayout(new BorderLayout());
 

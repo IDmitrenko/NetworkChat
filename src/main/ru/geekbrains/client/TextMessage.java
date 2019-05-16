@@ -19,6 +19,13 @@ public class TextMessage {
         this.text = text;
     }
 
+    public TextMessage(String userFrom, String userTo, String text, LocalDateTime created) {
+        this.created = created;
+        this.userFrom = userFrom;
+        this.userTo = userTo;
+        this.text = text;
+    }
+
     public String getUserFrom() {
         return userFrom;
     }
