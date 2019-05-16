@@ -81,6 +81,9 @@ public class Network implements Closeable {
         String messageHistory = userHistory.listHistory(login);
         TextMessage msg = new TextMessage(login, login, messageHistory);
         messageReciever.submitMessage(msg);
+        // TODO 1) если нет истории не делать messageReciever.submitMessage(msg);
+        //      2) по каждому сообщению готовить TextMessage msg = parseTextMessageRegx(text, login);
+        //         записывать setCreated и вызывать messageReciever.submitMessage(msg);
     }
 
     public void newUserRegistration(String login, String password) throws IOException, AuthException {

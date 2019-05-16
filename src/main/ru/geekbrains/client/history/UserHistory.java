@@ -54,8 +54,9 @@ public class UserHistory {
         File file = path.toFile();
         int readLines = 100 * 2;
 
-//        return readFromLast(file, readLines);
-        return lastNLines(file, readLines);
+        return readFromLast(file, readLines);
+        // TODO замерить время работы
+//        return lastNLines(file, readLines);
     }
 
     private String readFromLast(File file, int lines) throws UnsupportedEncodingException {
@@ -80,7 +81,6 @@ public class UserHistory {
                 }
                 bytes.addFirst(rc);
             }
-
         } catch (FileNotFoundException ex) {
             ex.printStackTrace();
         } catch (IOException ex) {
@@ -97,13 +97,12 @@ public class UserHistory {
         byte[] result = new byte[bytes.size()];
         int i = 0;
         for (Byte aByte : bytes) {
-            result[i++] = aByte.byteValue();
+            result[i++] = aByte;
         }
         return new String(result, "UTF-8");
     }
 
     private String lastNLines(File file, int lines) {
-
         StringBuilder message = new StringBuilder();
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));

@@ -18,7 +18,7 @@ public class TextMessageCellRenderer extends JPanel implements ListCellRenderer<
 
     private final JPanel panel;
 
-    private TextMessageCellRenderer() {
+    public TextMessageCellRenderer() {
         super();
         setLayout(new BorderLayout());
 
