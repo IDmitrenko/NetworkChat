@@ -76,7 +76,7 @@ public class UserHistory {
         return textMessageList;
     }
 
-    private List lastNLines(File file, int lines) {
+    private List<String> lastNLines(File file, int lines) {
         StringBuilder message = new StringBuilder();
         List<String> messageList = new ArrayList<>();
         try {
