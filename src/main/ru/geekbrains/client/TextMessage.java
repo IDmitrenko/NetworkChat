@@ -50,6 +50,10 @@ public class TextMessage {
         return created;
     }
 
+    public void setCreated(LocalDateTime created) {
+        this.created = created;
+    }
+
     /**
      * Это не очень хорошее решение проблемы с использованием класса как на клиенте
      * так и на сервере, но ничего лучше пока не придумал

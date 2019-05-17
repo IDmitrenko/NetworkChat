@@ -7,6 +7,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.List;
 import java.util.Set;
 
 import static ru.geekbrains.client.MessagePatterns.*;
@@ -78,12 +79,12 @@ public class Network implements Closeable {
 
     public void authorize(String login, String password) throws IOException, AuthException {
         connectToServer(login, AUTH_PATTERN, password, AUTH_SUCCESS_RESPONSE);
-        String messageHistory = userHistory.listHistory(login);
-        TextMessage msg = new TextMessage(login, login, messageHistory);
-        messageReciever.submitMessage(msg);
-        // TODO 1) если нет истории не делать messageReciever.submitMessage(msg);
-        //      2) по каждому сообщению готовить TextMessage msg = parseTextMessageRegx(text, login);
-        //         записывать setCreated и вызывать messageReciever.submitMessage(msg);
+        List<TextMessage> messageHistory = userHistory.listHistory(login);
+        if (!messageHistory.isEmpty()) {
+            for (TextMessage textMessage : messageHistory) {
+                messageReciever.submitMessage(textMessage);
+            }
+        }
     }
 
     public void newUserRegistration(String login, String password) throws IOException, AuthException {
