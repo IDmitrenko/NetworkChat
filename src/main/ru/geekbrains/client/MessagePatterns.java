@@ -1,9 +1,12 @@
 package ru.geekbrains.client;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static ru.geekbrains.client.swing.TextMessageCellRenderer.timeFormatter;
 
 public final class MessagePatterns {
 
@@ -32,6 +35,10 @@ public final class MessagePatterns {
 
     public static final Pattern MESSAGE_REC_PATTERN = Pattern.compile("^/w (\\w+) (.+)", Pattern.MULTILINE);
 
+    public static final Pattern MESSAGE_LIST_PATTERN = Pattern.compile("(.* .*) (.*)");
+
+    public static final String UTF8_BOM = "\uFEFF";
+
     public static TextMessage parseTextMessageRegx(String text, String userTo) {
         Matcher matcher = MESSAGE_REC_PATTERN.matcher(text);
         if (matcher.matches()) {
@@ -39,6 +46,17 @@ public final class MessagePatterns {
                     matcher.group(2));
         } else {
             System.out.println("Not a text message pattern: " + text);
+            return null;
+        }
+    }
+
+    public static TextMessage parseListMessageRegx(String part1, String text, String login) {
+        Matcher matcher = MESSAGE_LIST_PATTERN.matcher(part1);
+        if (matcher.matches()) {
+            LocalDateTime localDate = LocalDateTime.parse(removeUTF8BOM(matcher.group(1)), timeFormatter);
+            return new TextMessage(matcher.group(2), login, text, localDate);
+        } else {
+            System.out.println("Not a text message pattern: " + part1);
             return null;
         }
     }
@@ -77,7 +95,7 @@ public final class MessagePatterns {
         String[] parts = text.split(" ");
         if (parts.length >= 1 && parts[0].equals(USER_LIST_TAG)) {
             Set<String> users = new HashSet<>();
-            for (int i=1; i<parts.length; i++) {
+            for (int i = 1; i < parts.length; i++) {
                 users.add(parts[i]);
             }
             return users;
@@ -85,5 +103,12 @@ public final class MessagePatterns {
             System.out.println("Not a user list pattern: " + text);
             return null;
         }
+    }
+
+    private static String removeUTF8BOM(String s) {
+        if (s.startsWith(UTF8_BOM)) {
+            s = s.substring(1);
+        }
+        return s;
     }
 }

@@ -1,18 +1,21 @@
 package ru.geekbrains.client;
 
+import ru.geekbrains.client.history.UserHistory;
+
 import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.List;
 import java.util.Set;
 
 import static ru.geekbrains.client.MessagePatterns.*;
 
 public class Network implements Closeable {
 
-    public Socket socket;
-    public DataInputStream in;
+    private Socket socket;
+    private DataInputStream in;
     public DataOutputStream out;
 
     private String hostName;
@@ -23,10 +26,14 @@ public class Network implements Closeable {
 
     private Thread receiverThread;
 
-    public Network(String hostName, int port, MessageReciever messageReciever) {
+    private UserHistory userHistory;
+
+    public Network(String hostName, int port, MessageReciever messageReciever,
+                   UserHistory userHistory) {
         this.hostName = hostName;
         this.port = port;
         this.messageReciever = messageReciever;
+        this.userHistory = userHistory;
 
         this.receiverThread = new Thread(new Runnable() {
             @Override
@@ -39,6 +46,7 @@ public class Network implements Closeable {
                         TextMessage msg = parseTextMessageRegx(text, login);
                         if (msg != null) {
                             messageReciever.submitMessage(msg);
+                            userHistory.saveHistory(msg, login);
                             continue;
                         }
 
@@ -71,6 +79,12 @@ public class Network implements Closeable {
 
     public void authorize(String login, String password) throws IOException, AuthException {
         connectToServer(login, AUTH_PATTERN, password, AUTH_SUCCESS_RESPONSE);
+        List<TextMessage> messageHistory = userHistory.listHistory(login);
+        if (!messageHistory.isEmpty()) {
+            for (TextMessage textMessage : messageHistory) {
+                messageReciever.submitMessage(textMessage);
+            }
+        }
     }
 
     public void newUserRegistration(String login, String password) throws IOException, AuthException {
