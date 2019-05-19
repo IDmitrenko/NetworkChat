@@ -19,11 +19,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ChatServer {
 
     private AuthService authService;
     private Map<String, ClientHandler> clientHandlerMap = Collections.synchronizedMap(new HashMap<>());
+    private ExecutorService executorService;
 
     public static void main(String[] args) {
         AuthService authService;
@@ -50,6 +53,11 @@ public class ChatServer {
 
     public ChatServer(AuthService authService) {
         this.authService = authService;
+        this.executorService = Executors.newCachedThreadPool();
+    }
+
+    public ExecutorService getExecutorService() {
+        return executorService;
     }
 
     private void start(int port) {
