@@ -7,31 +7,42 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import static ru.geekbrains.client.MessagePatterns.parseListMessageRegx;
 import static ru.geekbrains.client.swing.TextMessageCellRenderer.timeFormatter;
 
-public class UserHistory {
+public class UserHistory implements ChatHistory {
+
+    private static final String MSG_PATTERN = "%s\t%s\t%s\t%s";
 
     private final String pathHistoryMessage;
+    private final String login;
 
-    public UserHistory(String pathHistoryMessage) {
+    private final Path path;
+    private final PrintWriter wr;
+    private final String nameFileMessage;
+    private final File printTextFile;
+
+
+    public UserHistory(String pathHistoryMessage, String login) throws IOException {
         this.pathHistoryMessage = pathHistoryMessage;
+        this.login = login;
+        nameFileMessage = "\\history_" + login + ".txt";
+        path = createFileObject(login);
+        //открываем поток для записи в файл текстовой информации в режиме добавления
+        printTextFile = new File(pathHistoryMessage + nameFileMessage);
+        wr = new PrintWriter(new BufferedOutputStream(new FileOutputStream(printTextFile, true)));
+//        wr = new PrintWriter(new BufferedWriter(new FileWriter(printTextFile, true)));
     }
 
-    public void saveHistory(TextMessage msg, String login) throws IOException {
-
-        Path path = createFileObject(login);
-        String nameFileMessage = "\\history_" + login + ".txt";
-        //открываем поток для записи в файл текстовой информации в режиме добавления
-        File printTextFile = new File(pathHistoryMessage + nameFileMessage);
-        try (PrintWriter wr = new PrintWriter(new BufferedWriter(new FileWriter(printTextFile, true)))) {
-            wr.println(msg.getCreated().format(timeFormatter) + " " + msg.getUserFrom());
-            wr.println(msg.getText());
-            wr.flush();
-        }
+    @Override
+    public synchronized void saveHistory(TextMessage message) {
+        String msg = String.format(MSG_PATTERN, message.getCreated().format(timeFormatter),
+                message.getUserFrom(), message.getUserTo(), message.getText());
+        wr.println(msg);
     }
 
     private Path createFileObject(String login) throws IOException {
@@ -42,7 +53,6 @@ public class UserHistory {
             Files.createDirectories(pathD);
         }
 
-        String nameFileMessage = "\\history_" + login + ".txt";
         Path pathF = Paths.get(pathHistoryMessage + nameFileMessage);
         if (!Files.exists(pathF, LinkOption.NOFOLLOW_LINKS)) {
             Files.createFile(pathF);
@@ -50,12 +60,45 @@ public class UserHistory {
         return pathF;
     }
 
-    public List<TextMessage> listHistory(String login) throws IOException {
+    @Override
+    public List<TextMessage> listHistory(int count) {
+        List<String> msgs = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(printTextFile))) {
+            while (reader.ready()) {
+                msgs.add(reader.readLine());
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        List<TextMessage> textMessageList = new ArrayList<>();
+        if (msgs.size() > count) {
+            msgs = msgs.subList(msgs.size() - count, msgs.size());
+        }
+        for (String str : msgs) {
+            textMessageList.add(parseMsg(str));
+        }
+
+        return textMessageList;
+    }
+
+    @Override
+    public void flush() {
+        wr.flush();
+    }
+
+    private TextMessage parseMsg(String str) {
+        String[] part = str.split("\t", 4);
+        return new TextMessage(part[1], part[2], part[3], LocalDateTime.parse(part[0], timeFormatter));
+    }
+
+/*
+        public List<TextMessage> listHistory(int count) throws IOException {
 
         List<TextMessage> textMessageList = new ArrayList<>();
         Path path = createFileObject(login);
         File file = path.toFile();
-        int readLines = 100 * 2;
+        int readLines = count * 2;
 
         List<String> messageList = lastNLines(file, readLines);
         int i = 0;
@@ -103,6 +146,7 @@ public class UserHistory {
         }
         return messageList;
     }
+*/
 
     /*
         private String readFromLast(File file, int lines) throws UnsupportedEncodingException {

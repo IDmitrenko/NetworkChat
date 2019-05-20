@@ -26,14 +26,11 @@ public class Network implements Closeable {
 
     private Thread receiverThread;
 
-    private UserHistory userHistory;
 
-    public Network(String hostName, int port, MessageReciever messageReciever,
-                   UserHistory userHistory) {
+    public Network(String hostName, int port, MessageReciever messageReciever) {
         this.hostName = hostName;
         this.port = port;
         this.messageReciever = messageReciever;
-        this.userHistory = userHistory;
 
         this.receiverThread = new Thread(new Runnable() {
             @Override
@@ -46,7 +43,6 @@ public class Network implements Closeable {
                         TextMessage msg = parseTextMessageRegx(text, login);
                         if (msg != null) {
                             messageReciever.submitMessage(msg);
-                            userHistory.saveHistory(msg, login);
                             continue;
                         }
 
@@ -79,12 +75,14 @@ public class Network implements Closeable {
 
     public void authorize(String login, String password) throws IOException, AuthException {
         connectToServer(login, AUTH_PATTERN, password, AUTH_SUCCESS_RESPONSE);
-        List<TextMessage> messageHistory = userHistory.listHistory(login);
+/*
+        List<TextMessage> messageHistory = userHistory.listHistory(50);
         if (!messageHistory.isEmpty()) {
             for (TextMessage textMessage : messageHistory) {
                 messageReciever.submitMessage(textMessage);
             }
         }
+*/
     }
 
     public void newUserRegistration(String login, String password) throws IOException, AuthException {

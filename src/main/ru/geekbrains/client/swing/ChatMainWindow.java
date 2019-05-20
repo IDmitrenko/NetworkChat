@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 public class ChatMainWindow extends JFrame implements MessageReciever {
@@ -36,7 +37,7 @@ public class ChatMainWindow extends JFrame implements MessageReciever {
 
     private final Network network;
 
-    private final UserHistory userHistory;
+    private UserHistory userHistory;
     private final String pathHistoryMessage;
 
     public ChatMainWindow(String pathHistoryMessage) {
@@ -82,11 +83,7 @@ public class ChatMainWindow extends JFrame implements MessageReciever {
                     messageListModel.add(messageListModel.size(), msg);
                     messageField.setText(null);
                     network.sendTextMessage(msg);
-                    try {
-                        userHistory.saveHistory(msg, network.getLogin());
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
+                    userHistory.saveHistory(msg);
 
                 }
             }
@@ -105,8 +102,8 @@ public class ChatMainWindow extends JFrame implements MessageReciever {
 
         setVisible(true);
 
-        this.userHistory = new UserHistory(pathHistoryMessage);
-        this.network = new Network("localhost", 7777, this, userHistory);
+
+        this.network = new Network("localhost", 7777, this);
 
         LoginDialog loginDialog = new LoginDialog(this, network);
         loginDialog.setVisible(true);
@@ -116,12 +113,30 @@ public class ChatMainWindow extends JFrame implements MessageReciever {
         }
 
         this.network.requestConnectedUserList();
+        try {
+            this.userHistory = new UserHistory(pathHistoryMessage, network.getLogin());
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(ChatMainWindow.this,
+                    "Ошибка",
+                    "Не запускается сервис истории сообщений",
+                    JOptionPane.ERROR_MESSAGE);
+            System.exit(0);
+        }
+
+        List<TextMessage> lastMessages = this.userHistory.listHistory(100);
+        for (TextMessage msg : lastMessages) {
+            messageListModel.add(messageListModel.size(), msg);
+        }
 
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
                 if (network != null) {
                     network.close();
+                }
+                if (userHistory != null) {
+                    userHistory.flush();
                 }
                 super.windowClosing(e);
             }
@@ -137,6 +152,7 @@ public class ChatMainWindow extends JFrame implements MessageReciever {
             public void run() {
                 messageListModel.add(messageListModel.size(), message);
                 messageList.ensureIndexIsVisible(messageListModel.size() - 1);
+                userHistory.saveHistory(message);
             }
         });
     }
