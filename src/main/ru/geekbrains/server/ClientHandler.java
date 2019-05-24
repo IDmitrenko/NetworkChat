@@ -16,7 +16,6 @@ public class ClientHandler {
     private final Socket socket;
     private final DataInputStream inp;
     private final DataOutputStream out;
-    private final Thread handleThread;
     private ChatServer chatServer;
 
     public ClientHandler(String login, Socket socket, ChatServer chatServer) throws IOException {
@@ -26,7 +25,7 @@ public class ClientHandler {
         this.out = new DataOutputStream(socket.getOutputStream());
         this.chatServer = chatServer;
 
-        this.handleThread = new Thread(new Runnable() {
+        chatServer.getExecutorService().execute(new Runnable() {
             @Override
             public void run() {
                 while (!Thread.currentThread().isInterrupted()) {
@@ -56,7 +55,6 @@ public class ClientHandler {
             }
         });
         this.chatServer = chatServer;
-        this.handleThread.start();
     }
 
     public String getLogin() {

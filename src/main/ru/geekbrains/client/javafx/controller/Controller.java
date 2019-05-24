@@ -46,7 +46,7 @@ public class Controller implements Initializable, MessageReciever {
     @FXML
     public ListView<String> lvUserList;
 
-    Stage primaryStage;
+    private Stage primaryStage;
 
     private ObservableList<TextMessage> messageList;
 
@@ -73,8 +73,7 @@ public class Controller implements Initializable, MessageReciever {
         userList.addAll("ivan", "petr", "julia"); // пока фмксированный список
         lvUserList.setItems(userList);
 
-        userHistory = new UserHistory(pathHistoryMessage);
-        network = new Network("localhost", 7777, this, userHistory);
+        network = new Network("localhost", 7777, this);
         authPanel.setVisible(true);
         msgPanel.setVisible(false);
     }
