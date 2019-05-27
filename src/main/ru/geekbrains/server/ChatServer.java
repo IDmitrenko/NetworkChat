@@ -19,14 +19,35 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 public class ChatServer {
 
     private AuthService authService;
     private Map<String, ClientHandler> clientHandlerMap = Collections.synchronizedMap(new HashMap<>());
-    private ExecutorService executorService;
+//ctp    private ExecutorService executorService;
+    private ExecutorService executorService = Executors.newFixedThreadPool(20,
+        new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread thr = Executors.defaultThreadFactory().newThread(r);
+                thr.setDaemon(true);
+                return thr;
+            }
+        });
+
+    // ExecutorService с ограниченным числом потоков и ограниченной очередью заданий
+    private ExecutorService limitedExecutorService = new ThreadPoolExecutor(20, 20,
+            0L, TimeUnit.MILLISECONDS,
+            new ArrayBlockingQueue<>(100, true),
+            new ThreadFactory() {
+                @Override
+                public Thread newThread(Runnable r) {
+                    Thread thr = Executors.defaultThreadFactory().newThread(r);
+                    thr.setDaemon(true);
+                    return thr;
+                }
+            });
 
     public static void main(String[] args) {
         AuthService authService;
@@ -53,12 +74,14 @@ public class ChatServer {
 
     public ChatServer(AuthService authService) {
         this.authService = authService;
-        this.executorService = Executors.newCachedThreadPool();
+//ctp        this.executorService = Executors.newCachedThreadPool();
     }
 
+/*ctp
     public ExecutorService getExecutorService() {
         return executorService;
     }
+*/
 
     private void start(int port) {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
@@ -121,7 +144,7 @@ public class ChatServer {
     }
 
     public boolean subscribe(String login, Socket socket) throws IOException {
-        clientHandlerMap.put(login, new ClientHandler(login, socket, this));
+        clientHandlerMap.put(login, new ClientHandler(login, socket, limitedExecutorService, this));
         sendUserConnectedMessage(login);
         return true;
     }

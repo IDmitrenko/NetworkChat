@@ -39,6 +39,8 @@ public final class MessagePatterns {
 
     public static final String UTF8_BOM = "\uFEFF";
 
+    public static final String MESSAGE_QUEUE_FULL = "Message queue full";
+
     public static TextMessage parseTextMessageRegx(String text, String userTo) {
         Matcher matcher = MESSAGE_REC_PATTERN.matcher(text);
         if (matcher.matches()) {
