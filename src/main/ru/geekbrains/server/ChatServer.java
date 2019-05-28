@@ -65,6 +65,7 @@ public class ChatServer {
             authService = new AuthServiceJdbcImpl(userRepository);
         } catch (SQLException e) {
             e.printStackTrace();
+            // лог ошибки
             return;
         }
 
@@ -86,11 +87,13 @@ public class ChatServer {
     private void start(int port) {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             System.out.println("Server started!");
+            // лог  - Сервер запущен
             while (true) {
                 Socket socket = serverSocket.accept();
                 DataInputStream inp = new DataInputStream(socket.getInputStream());
                 DataOutputStream out = new DataOutputStream(socket.getOutputStream());
                 System.out.println("New client connected!");
+                // лог клиент попытка подключения
 
                 User user = null;
                 try {
@@ -99,6 +102,7 @@ public class ChatServer {
                     user = userFactory.actionsOfUser(authMessage);
                 } catch (IOException ex) {
                     ex.printStackTrace();
+                    // лог ошибка аутентификации или добавления нового пользователя
                 }
 
                 if (user != null) {
@@ -109,6 +113,7 @@ public class ChatServer {
             }
         } catch (IOException ex) {
             ex.printStackTrace();
+            // лог ошибка
         }
     }
 
@@ -116,6 +121,7 @@ public class ChatServer {
         for (ClientHandler clientHandler : clientHandlerMap.values()) {
             if (!clientHandler.getLogin().equals(login)) {
                 System.out.printf("Sending connect notification to %s about %s%n", clientHandler.getLogin(), login);
+                // лог  подключение конкретного клиента прошло успешно
                 clientHandler.sendConnectedMessage(login);
             }
         }
@@ -125,6 +131,7 @@ public class ChatServer {
         for (ClientHandler clientHandler : clientHandlerMap.values()) {
             if (!clientHandler.getLogin().equals(login)) {
                 System.out.printf("Sending disconnect notification to %s about %s%n", clientHandler.getLogin(), login);
+                // лог отключение конкретного клиента
                 clientHandler.sendDisconnectedMessage(login);
             }
         }
@@ -133,6 +140,7 @@ public class ChatServer {
     public void sendMessage(TextMessage msg) throws IOException {
         ClientHandler userToClientHandler = clientHandlerMap.get(msg.getUserTo());
         if (userToClientHandler != null) {
+            // лог клиент прислал сообщение/команду
             userToClientHandler.sendMessage(msg.getUserFrom(), msg.getText());
         } else {
             System.out.printf("User %s not connected%n", msg.getUserTo());
