@@ -23,23 +23,25 @@ import java.util.concurrent.*;
 
 public class ChatServer {
 
+    public static final int MAXIMUM_POOL_SIZE = 4;
+    public static final int CAPACITY = 100;
     private AuthService authService;
-    private Map<String, ClientHandler> clientHandlerMap = Collections.synchronizedMap(new HashMap<>());
-//ctp    private ExecutorService executorService;
-    private ExecutorService executorService = Executors.newFixedThreadPool(20,
-        new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread thr = Executors.defaultThreadFactory().newThread(r);
-                thr.setDaemon(true);
-                return thr;
-            }
-        });
+    private Map<String, ClientHandler> clientHandlerMap = new ConcurrentHashMap<>();
+    //ctp    private ExecutorService executorService;
+    /*private ExecutorService executorService = Executors.newFixedThreadPool(20,
+            new ThreadFactory() {
+                @Override
+                public Thread newThread(Runnable r) {
+                    Thread thr = Executors.defaultThreadFactory().newThread(r);
+                    thr.setDaemon(true);
+                    return thr;
+                }
+            });*/
 
     // ExecutorService с ограниченным числом потоков и ограниченной очередью заданий
-    private ExecutorService limitedExecutorService = new ThreadPoolExecutor(20, 20,
+    private ExecutorService limitedExecutorService = new ThreadPoolExecutor(MAXIMUM_POOL_SIZE, MAXIMUM_POOL_SIZE,
             0L, TimeUnit.MILLISECONDS,
-            new ArrayBlockingQueue<>(100, true),
+            new ArrayBlockingQueue<>(CAPACITY, true),
             new ThreadFactory() {
                 @Override
                 public Thread newThread(Runnable r) {
@@ -94,7 +96,10 @@ public class ChatServer {
                 DataOutputStream out = new DataOutputStream(socket.getOutputStream());
                 System.out.println("New client connected!");
                 // лог клиент попытка подключения
-
+                if (clientHandlerMap.size() * 2 >= MAXIMUM_POOL_SIZE) {
+                    out.writeUTF("Thread pool is overfull, please wait until somebody disconnect and retry connect!!!");
+                    continue;
+                }
                 User user = null;
                 try {
                     String authMessage = inp.readUTF();
@@ -152,7 +157,8 @@ public class ChatServer {
     }
 
     public boolean subscribe(String login, Socket socket) throws IOException {
-        clientHandlerMap.put(login, new ClientHandler(login, socket, limitedExecutorService, this));
+        ClientHandler clientHandler = new ClientHandler(login, socket, limitedExecutorService, this);
+        clientHandlerMap.put(login, clientHandler);
         sendUserConnectedMessage(login);
         return true;
     }

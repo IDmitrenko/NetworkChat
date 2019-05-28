@@ -20,11 +20,8 @@ public class ClientHandler {
     private final Socket socket;
     private final DataInputStream inp;
     private final DataOutputStream out;
-    private ChatServer chatServer;
-    private final ExecutorService executorService;
-    private final Future<?> handlerFuture;
-
     private final BlockingDeque<String> messageQueue = new LinkedBlockingDeque<>();
+    private final FutureHandler futureHandler;
 
     public ClientHandler(String login, Socket socket,
                          ExecutorService executorService,
@@ -33,10 +30,8 @@ public class ClientHandler {
         this.socket = socket;
         this.inp = new DataInputStream(socket.getInputStream());
         this.out = new DataOutputStream(socket.getOutputStream());
-        this.executorService = executorService;
-        this.chatServer = chatServer;
 
-        this.handlerFuture = executorService.submit(new Runnable() {
+        Future<?> handlerFuture = executorService.submit(new Runnable() {
             @Override
             public void run() {
                 while (!Thread.currentThread().isInterrupted()) {
@@ -51,7 +46,7 @@ public class ClientHandler {
                             chatServer.sendMessage(msg);
                         } else if (text.equals(DISCONNECT)) {
                             System.out.printf("User %s is disconnected%n", login);
-                            chatServer.unsubscribe(login);
+                            closeClient(chatServer, login);
                             return;
                         } else if (text.equals(USER_LIST_TAG)) {
                             System.out.printf("Sending user list to %s%n", login);
@@ -59,7 +54,7 @@ public class ClientHandler {
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
-                        chatServer.unsubscribe(login);
+                        closeClient(chatServer, login);
                         break;
                     }
                 }
@@ -72,13 +67,13 @@ public class ClientHandler {
 
 //ctp        chatServer.getExecutorService().execute(new Runnable() {
 
-        executorService.submit(new Runnable() {
+        Future<?> messageFuture = executorService.submit(new Runnable() {
             @Override
             public void run() {
                 while (!Thread.currentThread().isInterrupted()) {
                     String msg = null;
                     try {
-                        msg =messageQueue.take();
+                        msg = messageQueue.take();
                     } catch (InterruptedException ex) {
                         return;
                     }
@@ -92,6 +87,13 @@ public class ClientHandler {
                 }
             }
         });
+        futureHandler = new FutureHandler(handlerFuture, messageFuture);
+    }
+
+    private void closeClient(ChatServer chatServer, String login) {
+        chatServer.unsubscribe(login);
+        futureHandler.getMessageFuture().cancel(true);
+        futureHandler.getCommandFuture().cancel(true);
     }
 
     public String getLogin() {
