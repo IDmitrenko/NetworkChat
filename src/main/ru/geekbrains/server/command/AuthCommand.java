@@ -9,6 +9,7 @@ import java.util.Map;
 
 import static ru.geekbrains.client.MessagePatterns.AUTH_FAIL_RESPONSE;
 import static ru.geekbrains.client.MessagePatterns.AUTH_SUCCESS_RESPONSE;
+import static ru.geekbrains.server.ChatServer.logger;
 
 public class AuthCommand extends CommonCommand {
     private final AuthService authService;
@@ -22,8 +23,10 @@ public class AuthCommand extends CommonCommand {
     protected boolean actionWithUser(User user) {
         if (authService.authUser(user)) {
             System.out.printf("User %s authorized successful!%n", user.getLogin());
+            logger.info("Пользователь " + user.getLogin() + " авторизован.");
             return true;
         } else {
+            logger.info("Пользователь " + user.getLogin() + " не авторизован.");
             return false;
         }
     }

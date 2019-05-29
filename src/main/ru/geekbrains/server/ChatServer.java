@@ -16,17 +16,19 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
+import java.util.logging.*;
 
 public class ChatServer {
 
-    public static final int MAXIMUM_POOL_SIZE = 4;
-    public static final int CAPACITY = 100;
+    public static final int MAXIMUM_POOL_SIZE = 20;
+    public static final int CAPACITY = 80;
     private AuthService authService;
     private Map<String, ClientHandler> clientHandlerMap = new ConcurrentHashMap<>();
+    public static final Logger logger = Logger.getLogger(ChatServer.class.getName());
+
     //ctp    private ExecutorService executorService;
     /*private ExecutorService executorService = Executors.newFixedThreadPool(20,
             new ThreadFactory() {
@@ -51,7 +53,7 @@ public class ChatServer {
                 }
             });
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         AuthService authService;
         try {
             Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/network_chat" +
@@ -71,6 +73,9 @@ public class ChatServer {
             return;
         }
 
+        LogManager.getLogManager().readConfiguration(ChatServer.class.getClassLoader()
+                .getResourceAsStream("jul.properties"));
+
         ChatServer chatServer = new ChatServer(authService);
         chatServer.start(7777);
     }
@@ -89,15 +94,18 @@ public class ChatServer {
     private void start(int port) {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             System.out.println("Server started!");
-            // лог  - Сервер запущен
+            logger.info("Server started!");
+
             while (true) {
                 Socket socket = serverSocket.accept();
                 DataInputStream inp = new DataInputStream(socket.getInputStream());
                 DataOutputStream out = new DataOutputStream(socket.getOutputStream());
                 System.out.println("New client connected!");
-                // лог клиент попытка подключения
+                logger.fine("New client connected!");
+
                 if (clientHandlerMap.size() * 2 >= MAXIMUM_POOL_SIZE) {
                     out.writeUTF("Thread pool is overfull, please wait until somebody disconnect and retry connect!!!");
+                    logger.warning("Thread pool is overfull, please wait until somebody disconnect and retry connect!!!");
                     continue;
                 }
                 User user = null;
@@ -107,18 +115,20 @@ public class ChatServer {
                     user = userFactory.actionsOfUser(authMessage);
                 } catch (IOException ex) {
                     ex.printStackTrace();
-                    // лог ошибка аутентификации или добавления нового пользователя
+                    logger.log(Level.SEVERE, "Authentication error or add a new user", ex);
                 }
 
                 if (user != null) {
                     subscribe(user.getLogin(), socket);
+                    logger.info("Подключился пользователь " + user.getLogin());
                 } else {
+                    logger.warning("Пользователю не удалось авторизоваться!");
                     socket.close();
                 }
             }
         } catch (IOException ex) {
             ex.printStackTrace();
-            // лог ошибка
+            logger.log(Level.SEVERE, "Не удалось запустить сервер!!!", ex);
         }
     }
 
@@ -126,7 +136,7 @@ public class ChatServer {
         for (ClientHandler clientHandler : clientHandlerMap.values()) {
             if (!clientHandler.getLogin().equals(login)) {
                 System.out.printf("Sending connect notification to %s about %s%n", clientHandler.getLogin(), login);
-                // лог  подключение конкретного клиента прошло успешно
+                logger.fine("Попытка подключения пользователя " + login);
                 clientHandler.sendConnectedMessage(login);
             }
         }
@@ -136,7 +146,7 @@ public class ChatServer {
         for (ClientHandler clientHandler : clientHandlerMap.values()) {
             if (!clientHandler.getLogin().equals(login)) {
                 System.out.printf("Sending disconnect notification to %s about %s%n", clientHandler.getLogin(), login);
-                // лог отключение конкретного клиента
+                logger.fine("Попытка отключения пользователя " + login);
                 clientHandler.sendDisconnectedMessage(login);
             }
         }
@@ -145,10 +155,13 @@ public class ChatServer {
     public void sendMessage(TextMessage msg) throws IOException {
         ClientHandler userToClientHandler = clientHandlerMap.get(msg.getUserTo());
         if (userToClientHandler != null) {
-            // лог клиент прислал сообщение/команду
+            logger.fine("Пользователь *" + msg.getUserFrom() + " посылает сообщение : "
+                    + msg.getText() + " пользователю *" + msg.getUserTo());
             userToClientHandler.sendMessage(msg.getUserFrom(), msg.getText());
         } else {
             System.out.printf("User %s not connected%n", msg.getUserTo());
+            logger.fine("Пользователь *" + msg.getUserFrom() + " посылает сообщение : "
+                    + msg.getText() + " пользователю *" + msg.getUserTo() + ", который не подключен к чату.");
         }
     }
 
@@ -170,6 +183,7 @@ public class ChatServer {
         } catch (IOException e) {
             System.err.println("Error sending disconnect message");
             e.printStackTrace();
+            logger.log(Level.SEVERE, "Ошибка при отсоединении пользователя " + login, e);
         }
     }
 }

@@ -3,6 +3,8 @@ package ru.geekbrains.server.auth;
 import ru.geekbrains.server.User;
 import ru.geekbrains.server.persistance.UserRepository;
 
+import static ru.geekbrains.server.ChatServer.logger;
+
 public class AuthServiceJdbcImpl implements AuthService {
 
     private final UserRepository userRepository;
@@ -27,7 +29,8 @@ public class AuthServiceJdbcImpl implements AuthService {
             return false;
         }
         // Добавляем нового пользователя
-         return userRepository.insert(user);
+        logger.info("Добавили нового пользователя " + user.getLogin() + " в БД.");
+        return userRepository.insert(user);
 
     }
 }
