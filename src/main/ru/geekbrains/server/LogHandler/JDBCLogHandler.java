@@ -3,6 +3,8 @@ package ru.geekbrains.server.LogHandler;
 import java.util.logging.*;
 import java.sql.*;
 
+import static ru.geekbrains.server.persistance.UserRepository.printSQLException;
+
 /**
  * JDBC Logging
  */
@@ -16,9 +18,9 @@ public class JDBCLogHandler extends Handler {
     // SQL для записи в таблицу лога.
     protected final  String insertSQL=
             "insert into " + tableName +
-                    " (level,logger,message,sequence,"
-                    +"sourceClass,sourceMethod,threadID,timeEntered)"
-                    +"values(?,?,?,?,?,?,?,?);";
+                    " (level,logger,message,sequence," +
+                    "sourceClass,sourceMethod,threadID,timeEntered)" +
+                    "values(?,?,?,?,?,?,?,?);";
 
     // SQL для очистки таблицы журнала.
     protected final String clearSQL=
@@ -35,6 +37,7 @@ public class JDBCLogHandler extends Handler {
     {
         try {
             this.connection = connection;
+            createTableLog(connection);
 
             prepInsert = connection.prepareStatement(insertSQL);
             prepClear = connection.prepareStatement(clearSQL);
@@ -112,4 +115,22 @@ public class JDBCLogHandler extends Handler {
     public void flush()
     {
     }
+
+    private void createTableLog(Connection conn) {
+        try (Statement statement = conn.createStatement()) {
+            String SQL = "CREATE TABLE IF NOT EXISTS " + tableName +
+                    " (level integer NOT NULL, " +
+                    "logger varchar(64) NOT NULL, " +
+                    "message varchar(255) NOT NULL, " +
+                    "sequence integer NOT NULL, " +
+                    "sourceClass varchar(64) NOT NULL, " +
+                    "sourceMethod varchar(32) NOT NULL, " +
+                    "threadID integer NOT NULL, " +
+                    "timeEntered datetime NOT NULL);";
+            statement.executeUpdate(SQL);
+        } catch (SQLException ex) {
+            printSQLException(ex);
+        }
+    }
+
 }

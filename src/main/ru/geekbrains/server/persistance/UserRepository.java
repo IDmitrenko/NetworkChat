@@ -92,7 +92,7 @@ public class UserRepository {
         }
 //    }
 
-    private static void printSQLException(SQLException ex) {
+    public static void printSQLException(SQLException ex) {
 
         for (Throwable e : ex) {
             if (e instanceof SQLException) {

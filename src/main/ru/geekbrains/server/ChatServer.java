@@ -58,7 +58,6 @@ public class ChatServer {
     public static void main(String[] args) throws IOException {
         AuthService authService;
         Connection conn;
-        final String driver = "com.mysql.jdbc.Driver";
         final String connectionString = "jdbc:mysql://localhost:3306/network_chat" +
                 "?allowPublicKeyRetrieval=TRUE" +
 //              "?verifyServerCertificate=false" +
