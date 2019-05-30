@@ -1,6 +1,7 @@
 package ru.geekbrains.server;
 
 import ru.geekbrains.client.TextMessage;
+import ru.geekbrains.server.LogHandler.JDBCLogHandler;
 import ru.geekbrains.server.auth.AuthService;
 import ru.geekbrains.server.auth.AuthServiceJdbcImpl;
 import ru.geekbrains.server.command.CommandFactory;
@@ -27,7 +28,8 @@ public class ChatServer {
     public static final int CAPACITY = 80;
     private AuthService authService;
     private Map<String, ClientHandler> clientHandlerMap = new ConcurrentHashMap<>();
-    public static final Logger logger = Logger.getLogger(ChatServer.class.getName());
+//    public static final Logger logger = Logger.getLogger(ChatServer.class.getName());
+    public static final Logger logger = Logger.getLogger("ChatServer.logger");
 
     //ctp    private ExecutorService executorService;
     /*private ExecutorService executorService = Executors.newFixedThreadPool(20,
@@ -55,26 +57,32 @@ public class ChatServer {
 
     public static void main(String[] args) throws IOException {
         AuthService authService;
+        Connection conn;
+        final String driver = "com.mysql.jdbc.Driver";
+        final String connectionString = "jdbc:mysql://localhost:3306/network_chat" +
+                "?allowPublicKeyRetrieval=TRUE" +
+//              "?verifyServerCertificate=false" +
+                "&useSSL=false" +
+                "&requireSSL=false" +
+                "&useLegacyDatetimeCode=false" +
+                "&amp" +
+                "&serverTimezone=UTC";
         try {
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/network_chat" +
-                            "?allowPublicKeyRetrieval=TRUE" +
-//                            "?verifyServerCertificate=false" +
-                            "&useSSL=false" +
-                            "&requireSSL=false" +
-                            "&useLegacyDatetimeCode=false" +
-                            "&amp" +
-                            "&serverTimezone=UTC",
+            conn = DriverManager.getConnection(connectionString,
                     "root", "DiasTopaz3922");
             UserRepository userRepository = new UserRepository(conn);
             authService = new AuthServiceJdbcImpl(userRepository);
         } catch (SQLException e) {
             e.printStackTrace();
-            // лог ошибки
+            logger.log(Level.SEVERE, "Ошибка подключения к БД.", e);
             return;
         }
 
         LogManager.getLogManager().readConfiguration(ChatServer.class.getClassLoader()
                 .getResourceAsStream("jul.properties"));
+
+        JDBCLogHandler jdbcLogHandler = new JDBCLogHandler(conn);
+        logger.addHandler(jdbcLogHandler);
 
         ChatServer chatServer = new ChatServer(authService);
         chatServer.start(7777);
@@ -115,7 +123,7 @@ public class ChatServer {
                     user = userFactory.actionsOfUser(authMessage);
                 } catch (IOException ex) {
                     ex.printStackTrace();
-                    logger.log(Level.SEVERE, "Authentication error or add a new user", ex);
+                    logger.log(Level.WARNING, "Authentication error or add a new user", ex);
                 }
 
                 if (user != null) {
@@ -183,7 +191,7 @@ public class ChatServer {
         } catch (IOException e) {
             System.err.println("Error sending disconnect message");
             e.printStackTrace();
-            logger.log(Level.SEVERE, "Ошибка при отсоединении пользователя " + login, e);
+            logger.log(Level.WARNING, "Ошибка при отсоединении пользователя " + login, e);
         }
     }
 }

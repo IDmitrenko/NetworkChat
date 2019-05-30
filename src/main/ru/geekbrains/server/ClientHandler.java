@@ -40,7 +40,7 @@ public class ClientHandler {
                     try {
                         String text = inp.readUTF();
                         System.out.printf("Message from user %s: %s%n", login, text);
-                        logger.info("Пришло сообщение для пользователя " + login + " : " + text);
+                        logger.info("Пришло сообщение от пользователя " + login + " : " + text);
                         System.out.println("New message " + text);
                         TextMessage msg = parseTextMessageRegx(text, login);
                         if (msg != null) {
@@ -114,9 +114,11 @@ public class ClientHandler {
     public void sendMessage(String userFrom, String msg) throws IOException {
         if (socket.isConnected()) {
 //            messageQueue.add(String.format(MESSAGE_SEND_PATTERN, userFrom, msg));
-            if (!messageQueue.offer(String.format(MESSAGE_SEND_PATTERN, userFrom, msg)))
+            if (!messageQueue.offer(String.format(MESSAGE_SEND_PATTERN, userFrom, msg))) {
                 out.writeUTF(MESSAGE_QUEUE_FULL);
-            logger.warning("Переполнена очередь сообщений пользователя " + this.login);
+                logger.warning("Переполнена очередь сообщений пользователя " + this.login);
+            }
+
         }
     }
 
