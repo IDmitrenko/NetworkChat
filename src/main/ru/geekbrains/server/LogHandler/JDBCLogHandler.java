@@ -1,5 +1,9 @@
 package ru.geekbrains.server.LogHandler;
 
+import com.mysql.cj.jdbc.Blob;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.logging.*;
 import java.sql.*;
 
@@ -11,6 +15,7 @@ import static ru.geekbrains.server.persistance.UserRepository.printSQLException;
 public class JDBCLogHandler extends Handler {
 
     private final String tableName = "log";
+    private final StringWriter sw = new StringWriter();
 
     // объект подключения
     Connection connection;
@@ -19,8 +24,8 @@ public class JDBCLogHandler extends Handler {
     protected final  String insertSQL=
             "insert into " + tableName +
                     " (level,logger,message,sequence," +
-                    "sourceClass,sourceMethod,threadID,timeEntered)" +
-                    "values(?,?,?,?,?,?,?,?);";
+                    "sourceClass,sourceMethod,threadID,timeEntered,trace)" +
+                    "values(?,?,?,?,?,?,?,?,?);";
 
     // SQL для очистки таблицы журнала.
     protected final String clearSQL=
@@ -80,6 +85,14 @@ public class JDBCLogHandler extends Handler {
             prepInsert.setTimestamp(8,
                     new Timestamp
                             (System.currentTimeMillis()) );
+            java.sql.Blob blob = null;
+            if (record.getThrown() != null) {
+                record.getThrown().printStackTrace(new PrintWriter(sw));
+                blob = connection.createBlob();
+                blob.setBytes(1, sw.toString().getBytes());
+            }
+            prepInsert.setBlob(9, blob);
+
             prepInsert.execute();
         } catch ( SQLException e ) {
             System.err.println("Error on open: " + e);
@@ -126,7 +139,8 @@ public class JDBCLogHandler extends Handler {
                     "sourceClass varchar(64) NOT NULL, " +
                     "sourceMethod varchar(32) NOT NULL, " +
                     "threadID integer NOT NULL, " +
-                    "timeEntered datetime NOT NULL);";
+                    "timeEntered datetime NOT NULL," +
+                    "trace blob NULL);";
             statement.executeUpdate(SQL);
         } catch (SQLException ex) {
             printSQLException(ex);

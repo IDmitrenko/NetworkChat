@@ -24,7 +24,7 @@ import java.util.logging.*;
 
 public class ChatServer {
 
-    public static final int MAXIMUM_POOL_SIZE = 20;
+    public static final int MAXIMUM_POOL_SIZE = 40;
     public static final int CAPACITY = 80;
     private AuthService authService;
     private Map<String, ClientHandler> clientHandlerMap = new ConcurrentHashMap<>();
@@ -82,6 +82,8 @@ public class ChatServer {
 
         JDBCLogHandler jdbcLogHandler = new JDBCLogHandler(conn);
         logger.addHandler(jdbcLogHandler);
+        SimpleFormatter formatter = new SimpleFormatter();
+        jdbcLogHandler.setFormatter(formatter);
 
         ChatServer chatServer = new ChatServer(authService);
         chatServer.start(7777);
@@ -120,6 +122,7 @@ public class ChatServer {
                     String authMessage = inp.readUTF();
                     UserFactory userFactory = CommandFactory.valueOf(authMessage, out, authService, clientHandlerMap);
                     user = userFactory.actionsOfUser(authMessage);
+//                    throw new IOException("Тестовое");
                 } catch (IOException ex) {
                     ex.printStackTrace();
                     logger.log(Level.WARNING, "Authentication error or add a new user", ex);
