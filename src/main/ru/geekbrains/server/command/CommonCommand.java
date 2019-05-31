@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import static ru.geekbrains.client.MessagePatterns.AUTH_ALREADY_RESPONSE;
+import static ru.geekbrains.server.ChatServer.logger;
 
 
 public abstract class CommonCommand implements UserFactory {
@@ -25,6 +26,7 @@ public abstract class CommonCommand implements UserFactory {
         String[] regParts = message.split(" ");
         if (regParts.length != 3) {
             System.out.printf("Incorrect registration message %s%n", message);
+            logger.warning("Неверное регистрационное сообщение: " + message);
             return sendFailResponse("Internal error");
         }
         User user = new User(0, regParts[1], regParts[2]);
@@ -32,6 +34,7 @@ public abstract class CommonCommand implements UserFactory {
         for (ClientHandler clientHandler : clientHandlerMap.values()) {
             if (clientHandler.getLogin().equals(regParts[1])) {
                 System.out.printf("The user %s is already connected%n", regParts[1]);
+                logger.warning("Пользователь " + regParts[1] + " уже подключен.");
                 return sendResponse(AUTH_ALREADY_RESPONSE);
             }
         }

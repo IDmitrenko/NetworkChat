@@ -9,6 +9,7 @@ import java.util.Map;
 
 import static ru.geekbrains.client.MessagePatterns.REGISTRATION_FAIL_RESPONSE;
 import static ru.geekbrains.client.MessagePatterns.REGISTRATION_SUCCESS_RESPONSE;
+import static ru.geekbrains.server.ChatServer.logger;
 
 public class RegistrationCommand extends CommonCommand {
 
@@ -23,6 +24,7 @@ public class RegistrationCommand extends CommonCommand {
     protected boolean actionWithUser(User user) {
         if (authService.createUser(user)) {
             System.out.printf("User %s added successfully!%n", user.getLogin());
+            logger.info("Пользователь " + user.getLogin() + " успешно авторизован!");
             return true;
         } else {
             return false;

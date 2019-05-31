@@ -6,6 +6,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ru.geekbrains.server.ChatServer.logger;
+
 public class UserRepository {
 
     private final Connection conn;
@@ -90,7 +92,7 @@ public class UserRepository {
         }
 //    }
 
-    private static void printSQLException(SQLException ex) {
+    public static void printSQLException(SQLException ex) {
 
         for (Throwable e : ex) {
             if (e instanceof SQLException) {
@@ -105,9 +107,16 @@ public class UserRepository {
 
                     System.err.println("Message: " + e.getMessage());
 
+                    logger.severe("SQLState: " +
+                            ((SQLException) e).getSQLState() +
+                                "%n Error Code: " +
+                            ((SQLException) e).getErrorCode() +
+                                "%n Message: " + e.getMessage());
+
                     Throwable t = ex.getCause();
                     while (t != null) {
                         System.out.println("Cause: " + t);
+                        logger.warning("Cause: " + t);
                         t = t.getCause();
                     }
                 }
@@ -119,6 +128,7 @@ public class UserRepository {
 
         if (sqlState == null) {
             System.out.println("The SQL state is not defined!");
+            logger.warning("The SQL state is not defined!");
             return false;
         }
 

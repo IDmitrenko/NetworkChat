@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ru.geekbrains.client.MessagePatterns.parseListMessageRegx;
 import static ru.geekbrains.client.swing.TextMessageCellRenderer.timeFormatter;
 
 public class UserHistory implements ChatHistory {
