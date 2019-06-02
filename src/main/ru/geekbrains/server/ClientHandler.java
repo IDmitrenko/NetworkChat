@@ -12,9 +12,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static ru.geekbrains.client.MessagePatterns.*;
-import static ru.geekbrains.server.ChatServer.logger;
 
 public class ClientHandler {
 
@@ -24,6 +24,7 @@ public class ClientHandler {
     private final DataOutputStream out;
     private final BlockingDeque<String> messageQueue = new LinkedBlockingDeque<>();
     private final FutureHandler futureHandler;
+    private static final Logger logger = Logger.getLogger(ClientHandler.class.getName());
 
     public ClientHandler(String login, Socket socket,
                          ExecutorService executorService,

@@ -6,13 +6,14 @@ import ru.geekbrains.server.auth.AuthService;
 
 import java.io.DataOutputStream;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import static ru.geekbrains.client.MessagePatterns.AUTH_FAIL_RESPONSE;
 import static ru.geekbrains.client.MessagePatterns.AUTH_SUCCESS_RESPONSE;
-import static ru.geekbrains.server.ChatServer.logger;
 
 public class AuthCommand extends CommonCommand {
     private final AuthService authService;
+    private static final Logger logger = Logger.getLogger(AuthCommand.class.getName());
 
     protected AuthCommand(DataOutputStream out, AuthService authService, Map<String, ClientHandler> clientHandlerMap) {
         super(out, clientHandlerMap);

@@ -6,14 +6,15 @@ import ru.geekbrains.server.auth.AuthService;
 
 import java.io.DataOutputStream;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import static ru.geekbrains.client.MessagePatterns.REGISTRATION_FAIL_RESPONSE;
 import static ru.geekbrains.client.MessagePatterns.REGISTRATION_SUCCESS_RESPONSE;
-import static ru.geekbrains.server.ChatServer.logger;
 
 public class RegistrationCommand extends CommonCommand {
 
     private final AuthService authService;
+    private static final Logger logger = Logger.getLogger(RegistrationCommand.class.getName());
 
     public RegistrationCommand(DataOutputStream out, AuthService authService, Map<String, ClientHandler> clientHandlerMap) {
         super(out, clientHandlerMap);

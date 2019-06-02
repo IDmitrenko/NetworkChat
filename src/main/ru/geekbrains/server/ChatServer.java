@@ -29,7 +29,8 @@ public class ChatServer {
     private AuthService authService;
     private Map<String, ClientHandler> clientHandlerMap = new ConcurrentHashMap<>();
 //    public static final Logger logger = Logger.getLogger(ChatServer.class.getName());
-    public static final Logger logger = Logger.getLogger("ChatServer.logger");
+    /*public static final Logger logger = Logger.getLogger("ChatServer.logger");*/
+    private static final Logger logger = Logger.getLogger(ChatServer.class.getName());
 
     //ctp    private ExecutorService executorService;
     /*private ExecutorService executorService = Executors.newFixedThreadPool(20,

@@ -4,11 +4,11 @@ import ru.geekbrains.server.User;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-
-import static ru.geekbrains.server.ChatServer.logger;
+import java.util.logging.Logger;
 
 public class UnknownCommand implements UserFactory {
     private final DataOutputStream out;
+    private static final Logger logger = Logger.getLogger(UnknownCommand.class.getName());
 
     public UnknownCommand(DataOutputStream out) {
         this.out = out;

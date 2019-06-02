@@ -1,11 +1,11 @@
 package ru.geekbrains.server.LogHandler;
 
-import com.mysql.cj.jdbc.Blob;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.logging.*;
 import java.sql.*;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import static ru.geekbrains.server.persistance.UserRepository.printSQLException;
 
@@ -16,6 +16,7 @@ public class JDBCLogHandler extends Handler {
 
     private final String tableName = "log";
     private final StringWriter sw = new StringWriter();
+    private static final Logger logger = Logger.getLogger(JDBCLogHandler.class.getName());
 
     // объект подключения
     Connection connection;

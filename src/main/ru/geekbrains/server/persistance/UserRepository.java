@@ -5,13 +5,13 @@ import ru.geekbrains.server.User;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-
-import static ru.geekbrains.server.ChatServer.logger;
+import java.util.logging.Logger;
 
 public class UserRepository {
 
     private final Connection conn;
     private final String tableName = "users";
+    private static final Logger logger = Logger.getLogger(UserRepository.class.getName());
 
     public UserRepository(Connection conn) throws SQLException {
         this.conn = conn;

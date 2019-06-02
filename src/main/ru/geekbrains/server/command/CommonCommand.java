@@ -1,19 +1,21 @@
 package ru.geekbrains.server.command;
 
+import ru.geekbrains.server.ChatServer;
 import ru.geekbrains.server.ClientHandler;
 import ru.geekbrains.server.User;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import static ru.geekbrains.client.MessagePatterns.AUTH_ALREADY_RESPONSE;
-import static ru.geekbrains.server.ChatServer.logger;
 
 
 public abstract class CommonCommand implements UserFactory {
     private final DataOutputStream out;
     private final Map<String, ClientHandler> clientHandlerMap;
+    private static final Logger logger = Logger.getLogger(CommonCommand.class.getName());
 
     protected CommonCommand(DataOutputStream out,
                             Map<String, ClientHandler> clientHandlerMap) {

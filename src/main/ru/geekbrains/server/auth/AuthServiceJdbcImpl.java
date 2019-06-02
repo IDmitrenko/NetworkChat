@@ -3,10 +3,11 @@ package ru.geekbrains.server.auth;
 import ru.geekbrains.server.User;
 import ru.geekbrains.server.persistance.UserRepository;
 
-import static ru.geekbrains.server.ChatServer.logger;
+import java.util.logging.Logger;
 
 public class AuthServiceJdbcImpl implements AuthService {
 
+    private static final Logger logger = Logger.getLogger(AuthServiceJdbcImpl.class.getName());
     private final UserRepository userRepository;
 
     public AuthServiceJdbcImpl(UserRepository userRepository) {
