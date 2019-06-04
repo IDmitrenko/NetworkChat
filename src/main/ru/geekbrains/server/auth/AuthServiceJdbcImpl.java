@@ -3,6 +3,7 @@ package ru.geekbrains.server.auth;
 import ru.geekbrains.server.User;
 import ru.geekbrains.server.persistance.UserRepository;
 
+import java.sql.SQLException;
 import java.util.logging.Logger;
 
 public class AuthServiceJdbcImpl implements AuthService {
@@ -31,7 +32,11 @@ public class AuthServiceJdbcImpl implements AuthService {
         }
         // Добавляем нового пользователя
         logger.info("Добавили нового пользователя " + user.getLogin() + " в БД.");
-        return userRepository.insert(user);
-
+        try {
+            return userRepository.insert(user);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

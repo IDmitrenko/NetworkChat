@@ -28,7 +28,6 @@ public class ChatServer {
     public static final int CAPACITY = 80;
     private AuthService authService;
     private Map<String, ClientHandler> clientHandlerMap = new ConcurrentHashMap<>();
-//    public static final Logger logger = Logger.getLogger(ChatServer.class.getName());
     /*public static final Logger logger = Logger.getLogger("ChatServer.logger");*/
     private static final Logger logger = Logger.getLogger(ChatServer.class.getName());
 
@@ -70,7 +69,7 @@ public class ChatServer {
         try {
             conn = DriverManager.getConnection(connectionString,
                     "root", "DiasTopaz3922");
-            UserRepository userRepository = new UserRepository(conn);
+            UserRepository<User> userRepository = new UserRepository(conn, User.class);
             authService = new AuthServiceJdbcImpl(userRepository);
         } catch (SQLException e) {
             e.printStackTrace();
