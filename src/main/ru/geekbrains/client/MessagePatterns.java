@@ -33,7 +33,7 @@ public final class MessagePatterns {
     public static final String MESSAGE_TAG = "/w";
     public static final String MESSAGE_SEND_PATTERN = MESSAGE_TAG + " %s %s";
 
-    public static final Pattern MESSAGE_REC_PATTERN = Pattern.compile("^/w (\\w+) (.+)", Pattern.MULTILINE);
+    public static final Pattern MESSAGE_REC_PATTERN = Pattern.compile("^/w ([\\wа-яА-Я]+) (.+)", Pattern.MULTILINE);
 
     public static final Pattern MESSAGE_LIST_PATTERN = Pattern.compile("(.* .*) (.*)");
 
